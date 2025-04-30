@@ -1,43 +1,48 @@
 package br.ueg.progwebi.pacienteapi.service.impl;
 
 import br.ueg.progwebi.pacienteapi.model.Paciente;
+import br.ueg.progwebi.pacienteapi.repository.PacienteRepository;
 import br.ueg.progwebi.pacienteapi.service.PacienteService;
+import org.apache.logging.log4j.util.Strings;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 @Service
 public class PacienteServiceImpl implements PacienteService {
 
+    @Autowired
+    private PacienteRepository repository;
+
+
     @Override
     public List<Paciente> listAll() {
-        Paciente paciente = new Paciente();
-        paciente.setId(1l);
-        paciente.setNome("João");
-        paciente.setCpf("123.456.789");
-        paciente.setSexo("M");
-        paciente.setEndereco("Rua do Silva");
-        paciente.setPendencia(true);
-        paciente.setDataNascimento(LocalDate.of(1990, 1, 12));
 
-        Paciente paciente2 = Paciente.builder()
-                .id(2l)
-                .nome("Maria")
-                .cpf("899.233.145-58")
-                .sexo("F")
-                .endereco("Rua Ipiranga")
-                .pendencia(false)
-                .dataNascimento(LocalDate.of(2009,2,20))
-                .build();
-        List<Paciente> pacientes = Arrays.asList(paciente, paciente2);
-        return pacientes;
+        return repository.findAll();
     }
 
     @Override
     public Paciente create(Paciente paciente) {
-        return null;
+        if(Strings.isEmpty(paciente.getNome())){
+            throw new RuntimeException("O nome não pode ser vazio!");
+        }
+
+        Optional<Paciente> checkExist = repository.findById(paciente.getId());
+        if(checkExist.isPresent()){
+            throw new RuntimeException("Esse paciente já existe!");
+        }
+
+        Optional<Paciente> checkExist2 = repository.findByNome(paciente.getNome());
+        if(checkExist2.isPresent()){
+            throw new RuntimeException("Já existe um paciente com esse nome.");
+        }
+
+        return repository.save(paciente);
     }
 
     @Override
@@ -52,6 +57,16 @@ public class PacienteServiceImpl implements PacienteService {
 
     @Override
     public Paciente update(Paciente paciente) {
-        return null;
+        if(Strings.isEmpty(paciente.getNome()) || Objects.isNull(paciente.getId())){
+            throw new RuntimeException("OInformação incompleta (nome ou ID)");
+        }
+
+        return repository.save(paciente);
+    }
+
+    @Override
+    public List<Paciente> listPacienteSexoF(String sexo) {
+        Optional<List<Paciente>> allPacientesSexo = repository.findAllPacientesSexo(sexo);
+        return allPacientesSexo.orElseGet(List::of);
     }
 }

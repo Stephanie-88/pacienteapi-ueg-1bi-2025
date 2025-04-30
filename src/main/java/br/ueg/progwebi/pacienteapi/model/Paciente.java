@@ -16,10 +16,9 @@ import java.time.LocalDate;
 @Entity
 public class Paciente {
     @Id
-    @Column(name = "PK")
     private long id;
 
-    @Column(lenght = 200)
+    @Column(unique = true)
     private String nome;
     private String cpf;
     private LocalDate dataNascimento;
