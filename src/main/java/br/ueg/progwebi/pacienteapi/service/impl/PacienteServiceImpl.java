@@ -47,6 +47,10 @@ public class PacienteServiceImpl implements PacienteService {
 
     @Override
     public Paciente getbyId(long id) {
+        Optional<Paciente> paciente = this.repository.findById(id);
+        if(paciente.isPresent()){
+            return paciente.get();
+        }
         return null;
     }
 
