@@ -6,6 +6,7 @@ import br.ueg.progwebi.pacienteapi.service.PacienteService;
 import br.ueg.progwebi.pacienteapi.service.exceptions.BusinessException;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -59,10 +60,16 @@ public class PacienteServiceImpl implements PacienteService {
     public Paciente delete(long id) {
         Optional<Paciente> paciente = repository.findById(id);
         if(Boolean.FALSE.equals(paciente.isPresent())){
-            throw new BusinessException("Id do paciente: " + id + "não encontrado.");
+            throw new BusinessException("Id do paciente: " + id + "não encontrado.",404);
         }
 
-        repository.delete(paciente.get());
+
+        try {
+            repository.delete(paciente.get());
+        }catch (DataIntegrityViolationException e){
+            throw new BusinessException("Id do paciente: " + id + "não pode ser removido por questões de integriade")
+        }
+
         return paciente.get();
     }
 
