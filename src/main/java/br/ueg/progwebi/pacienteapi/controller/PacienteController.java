@@ -1,14 +1,12 @@
 package br.ueg.progwebi.pacienteapi.controller;
 
+import br.ueg.progwebi.pacienteapi.controller.exceptions.ResourceNotFoundException;
 import br.ueg.progwebi.pacienteapi.model.Paciente;
 import br.ueg.progwebi.pacienteapi.service.PacienteService;
+import br.ueg.progwebi.pacienteapi.service.exceptions.BusinessException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.HttpClientErrorException;
 
-import java.time.LocalDate;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -44,8 +42,20 @@ public class PacienteController {
     public Paciente getById(@PathVariable Long id) {
         Paciente paciente = this.pacienteService.getbyId(id);
         if(Objects.isNull(paciente)){
-            throw new HttpClientErrorException(HttpStatusCode.valueOf(404), "Cliente não localizado");
+            throw new ResourceNotFoundException("Cliente não localizado");
         }
+        return paciente;
+    }
+
+    @DeleteMapping(path = "/{id}")
+    public Paciente delete(@PathVariable Long id){
+        Paciente paciente;
+        try {
+            paciente = this.pacienteService.delete(id);
+        }catch (BusinessException e){
+            throw new ResourceNotFoundException(e.getMessage());
+        }
+
         return paciente;
     }
 

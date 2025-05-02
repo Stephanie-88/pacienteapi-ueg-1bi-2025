@@ -3,6 +3,7 @@ package br.ueg.progwebi.pacienteapi.service.impl;
 import br.ueg.progwebi.pacienteapi.model.Paciente;
 import br.ueg.progwebi.pacienteapi.repository.PacienteRepository;
 import br.ueg.progwebi.pacienteapi.service.PacienteService;
+import br.ueg.progwebi.pacienteapi.service.exceptions.BusinessException;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -55,8 +56,14 @@ public class PacienteServiceImpl implements PacienteService {
     }
 
     @Override
-    public void delete(long id) {
+    public Paciente delete(long id) {
+        Optional<Paciente> paciente = repository.findById(id);
+        if(Boolean.FALSE.equals(paciente.isPresent())){
+            throw new BusinessException("Id do paciente: " + id + "não encontrado.");
+        }
 
+        repository.delete(paciente.get());
+        return paciente.get();
     }
 
     @Override
